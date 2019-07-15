@@ -9,6 +9,8 @@ class App extends Component{
   state = {
     products: [],
     cartItems: [],
+    category: "all",
+    search: ""
   }
 
   componentDidMount(){
@@ -19,21 +21,55 @@ class App extends Component{
 
   // }
 
-  filterCategories(){
+  onChangeCat = e => {
+    this.setState({category: e.target.value });
+  }
 
+  onChangeSearch = e => {
+    this.setState({search: e.target.value });
+  }
 
+  filterCategories(prod, cat){
+    if(cat === "all"){
+      return true;
+    }
+    if(prod.category === cat){
+      return true;
+    }
+  }
+
+  searchProducts(prod, searchText){
+    searchText.toLowerCase();
+    if (prod.name.toLowerCase().includes(searchText) || prod.description.toLowerCase().includes(searchText)){
+      return true;
+    }
   }
 
 
   render(){
+    let displayProducts = this.state.products;
+    displayProducts = displayProducts.filter(p => this.filterCategories(p, this.state.category))
+    displayProducts = displayProducts.filter(p => this.searchProducts(p, this.state.search))
+    
+    displayProducts = displayProducts.map((product, index) =>
+      <ListProducts
+          key = {index}
+          image = {product.imgUrl}
+          name = {product.name}
+          description = {product.description}
+          price = {product.price}
+          rating = {product.rating}
+      />
+    )
+
     return (
       <div>
         <div id='header'>
           <div id='title'><h1>ACA Store</h1></div>
           <div id='input'>
             <h2>search</h2>
-            <input type='text' id='textSearch' onChange={this.filterCategories({value})}></input>
-            <select id='categories'>
+            <input type='text' id='textSearch' onChange={this.onChangeSearch}></input>
+            <select id='categories' onChange={this.onChangeCat}>
               <option value='all'>all</option>
               <option value='electronics'>electronics</option>
               <option value='food'>food</option>
@@ -43,7 +79,8 @@ class App extends Component{
           <div className='cart'><span id = 'cart'></span><img src = './cart.png' alt = 'cart'/></div>
         </div>
         <div className="App">
-          {this.state.products.map((product, index) =>(
+          {displayProducts}
+          {/* {this.state.products.map((product, index) =>(
             <ListProducts
               key = {index}
               image = {product.imgUrl}
@@ -51,8 +88,8 @@ class App extends Component{
               description = {product.description}
               price = {product.price}
               rating = {product.rating}
-            />
-          ))}
+            /> */}
+          {/* ))} */}
         </div>
       </div>
     );
